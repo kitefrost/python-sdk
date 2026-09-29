@@ -1,0 +1,31 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kitefrost-ttrpg-gm"
+version = "1.2.0a2"
+description = "Per-pack KiteFrost SDK for the ttrpg-gm pack (clean brand-host URLs; depends on kitefrost-core). PPI-3."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["ai", "kitefrost", "sdk", "ttrpg-gm"]
+dependencies = [
+    "kitefrost-core>=1.2.0a2,<2.0.0",
+]
+
+[project.urls]
+Homepage = "https://kitefrost.ai"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kitefrost_ttrpg_gm"]
+
+# Resolve kitefrost-core from the local sdk/python uv workspace member
+# (packages/core), not PyPI, during `uv run`/`uv sync` in this repo.
+# Published installs (pip/uv add from PyPI) ignore this and use the
+# dependencies range above. Without this, `uv run` anywhere in the
+# workspace fails workspace resolution entirely (FND-20260901-CEC):
+# "kitefrost-core is included as a workspace member, but is missing
+# an entry in tool.uv.sources".
+[tool.uv.sources]
+kitefrost-core = { workspace = true }

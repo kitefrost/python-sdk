@@ -1,0 +1,61 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kitefrost-core"
+version = "1.2.0a2"
+description = "Shared runtime core (transport, auth, errors, shared-core resource clients) that every per-pack KiteFrost SDK depends on (PPI-3, D-PPI-SDK-BUNDLING Option A)."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["ai", "kitefrost", "sdk", "core", "runtime"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "httpx>=0.27.0,<1.0",  # 1.0 pre-releases change Client(); `pip --pre` pulls them
+]
+
+[project.urls]
+Homepage = "https://kitefrost.ai"
+Repository = "https://github.com/kitefrost/python-sdk"
+Issues = "https://github.com/kitefrost/python-sdk/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-httpx>=0.30.0",
+    "ruff>=0.8.0",
+    "mypy>=1.10.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/kitefrost_core"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["E501"]
+"src/**/*.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+ignore_missing_imports = true
