@@ -7,7 +7,8 @@ CI usage::
 
     kitefrost-gn-audit dialogue/ --project <project_id> --fail-on error --sarif audit.sarif
 
-Exit codes: 0 = no finding at/above --fail-on; 1 = findings; 2 = usage / API error.
+Exit codes: 0 = no finding at/above --fail-on; 1 = findings; 2 = usage / API error;
+3 = nothing was checked (no variable bound to an entity), so 0 findings proves nothing.
 Needs KITEFROST_API_KEY (and KITEFROST_BASE_URL while in alpha).
 """
 
@@ -36,7 +37,14 @@ def collect_files(root: str | Path) -> list[dict[str, str]]:
     return out
 
 
-def audit_path(client: Any, project_id: str, root: str | Path, *, entities: dict | None = None, sarif: bool = False):
+def audit_path(
+    client: Any,
+    project_id: str,
+    root: str | Path,
+    *,
+    entities: dict | None = None,
+    sarif: bool = False,
+):
     """Audit the Ink / Yarn files under ``root``. ``client`` is a GameNarrativeClient."""
     files = collect_files(root)
     if not files:
@@ -50,7 +58,9 @@ def audit_path(client: Any, project_id: str, root: str | Path, *, entities: dict
 def failing_findings(result: dict, fail_on: str) -> list[dict]:
     threshold = SEVERITY_RANK[fail_on]
     findings = (result.get("report") or {}).get("findings") or []
-    return [f for f in findings if SEVERITY_RANK.get(str(f.get("severity", "")).lower(), 0) >= threshold]
+    return [
+        f for f in findings if SEVERITY_RANK.get(str(f.get("severity", "")).lower(), 0) >= threshold
+    ]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -69,9 +79,13 @@ def main(argv: list[str] | None = None) -> int:
     from .client import GameNarrativeClient  # noqa: PLC0415
 
     client = GameNarrativeClient.from_api_key(api_key)
-    entities = json.loads(Path(args.entities).read_text(encoding="utf-8")) if args.entities else None
+    entities = (
+        json.loads(Path(args.entities).read_text(encoding="utf-8")) if args.entities else None
+    )
     try:
-        result = audit_path(client, args.project, args.path, entities=entities, sarif=bool(args.sarif))
+        result = audit_path(
+            client, args.project, args.path, entities=entities, sarif=bool(args.sarif)
+        )
     except Exception as exc:  # noqa: BLE001 - CLI boundary: report, exit 2
         print(f"kitefrost-gn-audit: {exc}", file=sys.stderr)
         return 2
@@ -79,9 +93,25 @@ def main(argv: list[str] | None = None) -> int:
         Path(args.sarif).write_text(json.dumps(result["sarif"], indent=2), encoding="utf-8")
     bad = failing_findings(result, args.fail_on)
     for f in (result.get("report") or {}).get("findings") or []:
-        print(f"{str(f.get('severity', '')).upper():7} {f.get('source_locus') or ''}  {f.get('message', '')}")
-    print(f"kitefrost-gn-audit: {result.get('files_audited', 0)} file(s), {len(bad)} at/above {args.fail_on}")
-    return 1 if bad else 0
+        sev = str(f.get("severity", "")).upper()
+        print(f"{sev:7} {f.get('source_locus') or ''}  {f.get('message', '')}")
+    bound = result.get("variables_bound")
+    print(
+        f"kitefrost-gn-audit: {result.get('files_audited', 0)} file(s), "
+        f"{bound if bound is not None else '?'}/{result.get('variables_found', '?')} "
+        "variable(s) checked, "
+        f"{len(bad)} at/above {args.fail_on}"
+    )
+    if bad:
+        return 1
+    if bound == 0:
+        print(
+            "kitefrost-gn-audit: no variable bound to an entity - nothing was checked "
+            "(pass --entities to bind them)",
+            file=sys.stderr,
+        )
+        return 3
+    return 0
 
 
 if __name__ == "__main__":
