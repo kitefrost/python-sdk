@@ -14,7 +14,7 @@
 set -euo pipefail
 
 PACK="${1:-}"
-VERSION="1.2.0a2"
+VERSION="1.2.0a3"
 API="https://api-staging.kitefrost.ai"
 DIR="${KITEFROST_VENV:-kitefrost-alpha}"
 

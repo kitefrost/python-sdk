@@ -1,7 +1,7 @@
 # kitefrost-game-narrative
 
 Per-pack KiteFrost SDK for the **game-narrative** pack (PPI-3). Depends on
-`kitefrost-core` (lockstep `1.2.0a2`); only the pack-specific resources are
+`kitefrost-core` (lockstep `1.2.0a3`); only the pack-specific resources are
 generated here. GENERATED - regenerate via `tools/sdk-codegen/targets.py`.
 
 ```python
