@@ -189,6 +189,9 @@ class TtrpgResource(_BaseResource):
     def check_journal_continuity(self, project_id: str, body: dict[str, Any]) -> Any:
         return self._t.post(f"/v1/projects/{quote(project_id)}/ttrpg-gm/continuity/check", json=body)
 
+    def check_markdown_notes(self, project_id: str, body: dict[str, Any]) -> Any:
+        return self._t.post(f"/v1/projects/{quote(project_id)}/ttrpg-gm/continuity/check-notes", json=body)
+
     def create_encounter(self, project_id: str, body: dict[str, Any]) -> Any:
         return self._t.post(f"/v1/projects/{quote(project_id)}/ttrpg-gm/encounters", json=body)
 
