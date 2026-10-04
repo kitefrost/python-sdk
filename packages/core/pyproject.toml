@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kitefrost-core"
-version = "1.2.0a3"
+version = "1.2.0a4"
 description = "Shared runtime core (transport, auth, errors, shared-core resource clients) that every per-pack KiteFrost SDK depends on (PPI-3, D-PPI-SDK-BUNDLING Option A)."
 readme = "README.md"
 requires-python = ">=3.10"

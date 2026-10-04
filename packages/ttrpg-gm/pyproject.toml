@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kitefrost-ttrpg-gm"
-version = "1.2.0a3"
+version = "1.2.0a4"
 description = "Per-pack KiteFrost SDK for the ttrpg-gm pack (clean brand-host URLs; depends on kitefrost-core). PPI-3."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 keywords = ["ai", "kitefrost", "sdk", "ttrpg-gm"]
 dependencies = [
-    "kitefrost-core>=1.2.0a3,<2.0.0",
+    "kitefrost-core>=1.2.0a4,<2.0.0",
 ]
 
 [project.urls]

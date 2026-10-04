@@ -26,11 +26,11 @@ pool (the Option-A DX win).
 
 ## Pre-release (alpha) builds
 
-Alpha and beta builds are published as PyPI pre-releases (`1.2.0a3`, `1.2.0b1`,
+Alpha and beta builds are published as PyPI pre-releases (`1.2.0a4`, `1.2.0b1`,
 `1.2.0rc1`). pip skips them unless you ask:
 
 ```bash
-pip install kitefrost-core==1.2.0a3 kitefrost-<pack>==1.2.0a3   # pin the alpha; do NOT use --pre (see below)
+pip install kitefrost-core==1.2.0a4 kitefrost-<pack>==1.2.0a4   # pin the alpha; do NOT use --pre (see below)
 ```
 
 Pin the exact alpha version rather than using `pip install --pre`: `--pre` lets pip pick

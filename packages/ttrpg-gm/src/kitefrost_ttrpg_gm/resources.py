@@ -192,6 +192,12 @@ class TtrpgResource(_BaseResource):
     def check_markdown_notes(self, project_id: str, body: dict[str, Any]) -> Any:
         return self._t.post(f"/v1/projects/{quote(project_id)}/ttrpg-gm/continuity/check-notes", json=body)
 
+    def check_records_route(self, project_id: str) -> Any:
+        return self._t.post(f"/v1/projects/{quote(project_id)}/ttrpg-gm/continuity/check-records")
+
+    def check_spoilers_route(self, project_id: str, body: dict[str, Any]) -> Any:
+        return self._t.post(f"/v1/projects/{quote(project_id)}/ttrpg-gm/continuity/spoiler-check", json=body)
+
     def create_encounter(self, project_id: str, body: dict[str, Any]) -> Any:
         return self._t.post(f"/v1/projects/{quote(project_id)}/ttrpg-gm/encounters", json=body)
 
@@ -231,6 +237,9 @@ class TtrpgResource(_BaseResource):
     def get_note(self, project_id: str, note_id: str) -> Any:
         return self._t.get(f"/v1/projects/{quote(project_id)}/ttrpg-gm/notes/{quote(note_id)}")
 
+    def get_notes_key_map(self, project_id: str) -> Any:
+        return self._t.get(f"/v1/projects/{quote(project_id)}/ttrpg-gm/notes/key-map")
+
     def get_quest(self, project_id: str, quest_id: str) -> Any:
         return self._t.get(f"/v1/projects/{quote(project_id)}/ttrpg-gm/quests/{quote(quest_id)}")
 
@@ -254,6 +263,9 @@ class TtrpgResource(_BaseResource):
 
     def list_sessions(self, project_id: str) -> Any:
         return self._t.get(f"/v1/projects/{quote(project_id)}/ttrpg-gm/sessions")
+
+    def put_notes_key_map(self, project_id: str, body: dict[str, Any]) -> Any:
+        return self._t.patch(f"/v1/projects/{quote(project_id)}/ttrpg-gm/notes/key-map", json=body)
 
     def quick_dialogue(self, project_id: str, body: dict[str, Any]) -> Any:
         return self._t.post(f"/v1/projects/{quote(project_id)}/quick-dialogue", json=body)
