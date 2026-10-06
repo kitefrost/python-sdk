@@ -273,6 +273,9 @@ class TtrpgResource(_BaseResource):
     def refine_quest(self, project_id: str, quest_id: str, body: dict[str, Any]) -> Any:
         return self._t.post(f"/v1/projects/{quote(project_id)}/ttrpg-gm/quests/{quote(quest_id)}/refine", json=body)
 
+    def session_brief(self, project_id: str, body: dict[str, Any]) -> Any:
+        return self._t.post(f"/v1/projects/{quote(project_id)}/ttrpg-gm/notes/brief", json=body)
+
     def update_encounter(self, project_id: str, encounter_id: str, body: dict[str, Any]) -> Any:
         return self._t.patch(f"/v1/projects/{quote(project_id)}/ttrpg-gm/encounters/{quote(encounter_id)}", json=body)
 
