@@ -26,11 +26,11 @@ pool (the Option-A DX win).
 
 ## Pre-release (alpha) builds
 
-Alpha and beta builds are published as PyPI pre-releases (`1.2.0a4`, `1.2.0b1`,
+Alpha and beta builds are published as PyPI pre-releases (`1.2.0a5`, `1.2.0b1`,
 `1.2.0rc1`). pip skips them unless you ask:
 
 ```bash
-pip install kitefrost-core==1.2.0a4 kitefrost-<pack>==1.2.0a4   # pin the alpha; do NOT use --pre (see below)
+pip install kitefrost-core==1.2.0a5 kitefrost-<pack>==1.2.0a5   # pin the alpha; do NOT use --pre (see below)
 ```
 
 Pin the exact alpha version rather than using `pip install --pre`: `--pre` lets pip pick
@@ -41,3 +41,8 @@ development build that this SDK does not support.
 To point the client at a non-default API (for example the address in an early-access
 invite), set `KITEFROST_BASE_URL`, or pass `base_url=` to the client. The explicit
 argument wins over the environment variable, which wins over the default.
+
+Your API key goes to whatever address this names, so the client checks it first: it
+must be `https` (plain `http` only for `localhost`), may not contain a `user:pass@`
+part, and an address outside `kitefrost.ai` prints a one-time warning naming the
+host your requests will actually reach. Only use the address KiteFrost gave you.

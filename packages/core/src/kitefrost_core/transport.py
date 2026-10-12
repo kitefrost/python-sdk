@@ -32,12 +32,93 @@ BASE_URL_ENV = "KITEFROST_BASE_URL"
 
 
 def resolve_base_url(base_url: str | None) -> str:
-    """Explicit argument > KITEFROST_BASE_URL > DEFAULT_BASE_URL."""
-    if base_url:
-        return base_url
+    """Explicit argument > KITEFROST_BASE_URL > DEFAULT_BASE_URL, then checked.
+
+    Whatever host this names receives the bearer credential on every call, so the
+    value is checked before use (FND-20261012 base-URL tampering, see
+    tests/test_base_url_tampering.py): unsafe schemes and embedded credentials are
+    refused, and a host outside kitefrost.ai is announced once with its REAL
+    parsed name (a lookalike such as ``https://api.kitefrost.ai@evil.example``
+    goes to ``evil.example``). Warn, not block: proxies and local servers are
+    legitimate.
+    """
     import os
 
-    return os.environ.get(BASE_URL_ENV) or DEFAULT_BASE_URL
+    if base_url:
+        resolved, source = base_url, "base_url="
+    else:
+        env = os.environ.get(BASE_URL_ENV)
+        resolved, source = (env, BASE_URL_ENV) if env else (DEFAULT_BASE_URL, "default")
+    check_base_url(resolved, source)
+    return resolved
+
+
+_warned_hosts: set[str] = set()
+
+
+def _is_loopback(host: str) -> bool:
+    """True only for ``localhost`` or a literal loopback IP.
+
+    Parsed as an address, never matched as a string: ``127.evil.example`` is a DNS
+    name that can resolve anywhere, so a prefix check would let plain http (and the
+    bearer key) go to an arbitrary server. Legacy IPv4 spellings (``2130706433``,
+    ``0x7f.1``) are not addresses here and are simply not loopback.
+    """
+    if host == "localhost":
+        return True
+    import ipaddress
+
+    try:
+        ip = ipaddress.ip_address(host.strip("[]"))
+    except ValueError:
+        return False
+    mapped = getattr(ip, "ipv4_mapped", None)
+    return (mapped or ip).is_loopback
+
+
+def check_base_url(url: str, source: str = "base_url") -> None:
+    """Refuse a base URL that would leak the credential; warn on a foreign host.
+
+    * scheme must be ``https``; plain ``http`` only to a loopback dev server
+      (anything else sends the key in cleartext)
+    * no ``user:pass@`` part - it has no legitimate use here and is the classic
+      lookalike trick
+    * a host that is neither ``kitefrost.ai``/``*.kitefrost.ai`` nor loopback gets
+      one ``UserWarning`` per process naming the real host and where it came from
+    """
+    try:
+        parsed = httpx.URL(url)
+    except Exception as exc:
+        raise ValueError(f"{source}: not a valid URL: {url!r}") from exc
+    host = (parsed.host or "").lower().rstrip(".")
+    if not host:
+        raise ValueError(f"{source}: URL has no host: {url!r}")
+    if parsed.userinfo:
+        raise ValueError(
+            f"{source}: credentials in the URL are not allowed (the request would go to {host!r})"
+        )
+    if parsed.scheme != "https" and not (parsed.scheme == "http" and _is_loopback(host)):
+        raise ValueError(
+            f"{source}: scheme {parsed.scheme!r} not allowed - use https "
+            "(plain http is accepted only for localhost dev servers)"
+        )
+    if host == "kitefrost.ai" or host.endswith(".kitefrost.ai") or _is_loopback(host):
+        return
+    if host not in _warned_hosts:
+        import warnings
+
+        warnings.warn(
+            f"KiteFrost API requests and your API key will be sent to {host!r} "
+            f"(from {source}), which is not a kitefrost.ai host. Unset it unless you "
+            "trust that server.",
+            UserWarning,
+            stacklevel=4,
+        )
+        # Remember only once the warning went out: with warnings-as-errors the call
+        # above raises, and a retry must raise again rather than pass silently.
+        _warned_hosts.add(host)
+
+
 DEFAULT_TIMEOUT = 30.0
 
 
@@ -92,7 +173,9 @@ class Transport:
         self._auth = auth
         self._user_agent = user_agent or f"kitefrost-core/{CORE_VERSION}"
         # A single httpx.Client = one connection pool shared by all resources.
-        self._client = client or httpx.Client(base_url=resolve_base_url(base_url).rstrip("/"), timeout=timeout)
+        self._client = client or httpx.Client(
+            base_url=resolve_base_url(base_url).rstrip("/"), timeout=timeout
+        )
 
     def _headers(self, auth_header: str) -> dict[str, str]:
         return {

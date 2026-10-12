@@ -9,6 +9,18 @@ ProjectNotFound / ValidationError / RateLimited / ServerError, plus the
 from __future__ import annotations
 
 
+def _printable(text: str) -> str:
+    """Escape control characters in server-supplied text.
+
+    Error text comes from whatever host the client points at. Raw ANSI escapes or
+    newlines in it would let that host rewrite the terminal or forge extra lines in
+    the caller's logs, so they are rendered visibly (``\\x1b``, ``\\n``) instead.
+    """
+    if text.isprintable():
+        return text
+    return "".join(c if c.isprintable() else repr(c)[1:-1] for c in text)
+
+
 class KiteFrostError(Exception):
     """Base exception for all KiteFrost core errors.
 
@@ -34,10 +46,11 @@ class KiteFrostError(Exception):
                 message = message["message"]
             else:
                 message = repr(message)
+        message = _printable(message)
         super().__init__(message)
         self.message = message
         self.status_code = status_code
-        self.feedback_id = feedback_id
+        self.feedback_id = _printable(feedback_id) if isinstance(feedback_id, str) else feedback_id
 
     def __str__(self) -> str:
         base = self.message
