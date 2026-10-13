@@ -8,7 +8,7 @@ the contract version it was generated against.
 
 from __future__ import annotations
 
-CORE_VERSION = "1.2.0a5"
+CORE_VERSION = "1.2.0a6"
 
 
 def assert_core_version_compatible(required_major: int) -> None:

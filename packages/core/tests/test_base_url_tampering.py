@@ -341,3 +341,26 @@ def test_warning_escalated_to_error_keeps_failing_on_retry():
 @pytest.mark.parametrize("ch", ["\u202e", "\u200b", "\u2066", "\u0085", "\u009b", "\u2028"])
 def test_invisible_and_bidi_characters_are_escaped(ch):
     assert ch not in KiteFrostError(f"status: {ch}DEIFIREV").message
+
+
+# doc-test 2026-10-12 (Codex + Claude): an injected httpx.Client skipped the check.
+@pytest.mark.parametrize("url", ["http://evil.example", "https://u:p@api.kitefrost.ai"])
+def test_injected_client_base_url_is_checked_too(url):
+    with pytest.raises(ValueError):
+        KiteFrostCore(api_key=API_KEY, http_client=httpx.Client(base_url=url))
+
+
+def test_injected_foreign_client_warns():
+    with pytest.warns(UserWarning, match=r"proxy\.example"):
+        KiteFrostCore(
+            api_key=API_KEY, http_client=httpx.Client(base_url="https://proxy.example")
+        ).close()
+
+
+def test_base_url_and_client_together_is_refused():
+    with pytest.raises(ValueError, match="not both"):
+        KiteFrostCore(
+            api_key=API_KEY,
+            base_url="https://api.kitefrost.ai",
+            http_client=httpx.Client(base_url="https://api.kitefrost.ai"),
+        )

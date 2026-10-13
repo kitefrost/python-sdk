@@ -173,9 +173,19 @@ class Transport:
         self._auth = auth
         self._user_agent = user_agent or f"kitefrost-core/{CORE_VERSION}"
         # A single httpx.Client = one connection pool shared by all resources.
-        self._client = client or httpx.Client(
-            base_url=resolve_base_url(base_url).rstrip("/"), timeout=timeout
-        )
+        if client is not None:
+            # An injected client carries its own base URL, and every request sends the
+            # bearer to it - so it gets the same R-BUT check (doc-test 2026-10-12: this
+            # path skipped it). base_url= alongside client= would be silently ignored,
+            # so refuse the ambiguity instead.
+            if base_url:
+                raise ValueError("pass base_url= or client=, not both (the client's base URL wins)")
+            check_base_url(str(client.base_url), "client.base_url")
+            self._client = client
+        else:
+            self._client = httpx.Client(
+                base_url=resolve_base_url(base_url).rstrip("/"), timeout=timeout
+            )
 
     def _headers(self, auth_header: str) -> dict[str, str]:
         return {

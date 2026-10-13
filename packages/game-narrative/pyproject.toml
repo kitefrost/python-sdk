@@ -4,14 +4,14 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kitefrost-game-narrative"
-version = "1.2.0a5"
+version = "1.2.0a6"
 description = "Per-pack KiteFrost SDK for the game-narrative pack (clean brand-host URLs; depends on kitefrost-core). PPI-3."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
 keywords = ["ai", "kitefrost", "sdk", "game-narrative"]
 dependencies = [
-    "kitefrost-core>=1.2.0a5,<2.0.0",
+    "kitefrost-core>=1.2.0a6,<2.0.0",
 ]
 
 [project.scripts]
