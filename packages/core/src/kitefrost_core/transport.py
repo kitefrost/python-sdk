@@ -226,6 +226,9 @@ class Transport:
 
         if response.status_code == 204 or not response.content:
             return None
+        media_type = response.headers.get("content-type", "").split(";", 1)[0].strip().lower()
+        if media_type and media_type != "application/json" and not media_type.endswith("+json"):
+            return response.text
         return response.json()
 
     def get(self, path: str, params: dict[str, Any] | None = None) -> Any:
@@ -236,6 +239,9 @@ class Transport:
 
     def patch(self, path: str, json: dict[str, Any]) -> Any:
         return self.request("PATCH", path, json=json)
+
+    def put(self, path: str, json: dict[str, Any]) -> Any:
+        return self.request("PUT", path, json=json)
 
     def delete(self, path: str) -> Any:
         return self.request("DELETE", path)

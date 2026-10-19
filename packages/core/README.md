@@ -24,6 +24,13 @@ When a customer installs more than one per-pack SDK, the packs share a single
 `KiteFrostCore` instance, so they share one auth provider and one connection
 pool (the Option-A DX win).
 
+## BYOK migration (2026-10-17)
+
+Pass the project ID to `core.byok.list(project_id)` and
+`core.byok.set(project_id, body)`. The old `list()` and `set(body)` calls targeted
+no server route; they now raise TypeError with the required signature before
+making a request. Credentials use project-scoped GET and PUT requests.
+
 ## Pre-release (alpha) builds
 
 Alpha and beta builds are published as PyPI pre-releases (`1.2.0a6`, `1.2.0b1`,

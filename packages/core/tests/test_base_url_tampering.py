@@ -64,7 +64,7 @@ class _Rogue:
                 self.end_headers()
                 self.wfile.write(rogue.body)
 
-            do_GET = do_POST = do_PATCH = do_DELETE = _handle
+            do_GET = do_POST = do_PUT = do_PATCH = do_DELETE = _handle
 
             def log_message(self, *args: Any) -> None:  # keep test output clean
                 pass
@@ -124,7 +124,7 @@ def test_byok_set_forwards_third_party_provider_keys_to_the_rogue_host(rogue, co
     host also harvests (e.g.) an Anthropic/OpenAI key the user never meant to
     expose to a third party.
     """
-    core_via_env.byok.set({"provider": "anthropic", "api_key": "provider-secret-xyz"})
+    core_via_env.byok.set("project-id", {"provider": "anthropic", "api_key": "provider-secret-xyz"})
     assert b"provider-secret-xyz" in rogue.requests[0]["body"]
 
 
